@@ -1,0 +1,129 @@
+diff -aurN xorg-server-1.12.1.orig/glx/indirect_table.c xorg-server-1.12.1/glx/indirect_table.c
+--- xorg-server-1.12.1.orig/glx/indirect_table.c	2012-04-21 23:39:01.817692571 +0200
++++ xorg-server-1.12.1/glx/indirect_table.c	2012-04-21 23:41:51.805567428 +0200
+@@ -227,9 +227,10 @@
+     /* [ 111] =   167 */ {NULL, NULL},
+ };
+ 
+-const struct __glXDispatchInfo Single_dispatch_info = {
++struct __glXDispatchInfo Single_dispatch_info = {
+     8,
+     Single_dispatch_tree,
++    { { -1 } },
+     Single_function_table,
+     NULL,
+     NULL
+@@ -1412,9 +1413,10 @@
+     __glXDeleteRenderbuffersEXTReqSize,
+ };
+ 
+-const struct __glXDispatchInfo Render_dispatch_info = {
++struct __glXDispatchInfo Render_dispatch_info = {
+     13,
+     Render_dispatch_tree,
++    { { -1 } },
+     Render_function_table,
+     Render_size_table,
+     Render_size_func_table
+@@ -1827,9 +1829,10 @@
+     /* [ 103] = 65551 */ {NULL, NULL},
+ };
+ 
+-const struct __glXDispatchInfo VendorPriv_dispatch_info = {
++struct __glXDispatchInfo VendorPriv_dispatch_info = {
+     17,
+     VendorPriv_dispatch_tree,
++    { { -1 } },
+     VendorPriv_function_table,
+     NULL,
+     NULL
+diff -aurN xorg-server-1.12.1.orig/glx/indirect_table.h xorg-server-1.12.1/glx/indirect_table.h
+--- xorg-server-1.12.1.orig/glx/indirect_table.h	2012-04-21 23:39:01.819692546 +0200
++++ xorg-server-1.12.1/glx/indirect_table.h	2012-04-21 23:43:23.621419571 +0200
+@@ -47,6 +47,12 @@
+      */
+     const int_fast16_t *dispatch_tree;
+ 
++#define DISPATCH_CACHE_SIZE 32
++    struct dispatch_cache {
++	uint16_t opcode;
++	int16_t index;
++    } dispatch_cache[DISPATCH_CACHE_SIZE];
++
+     /**
+      * Array of protocol decode and dispatch functions index by the opcode
+      * search tree (i.e., \c dispatch_tree).  The first element in each pair
+@@ -99,8 +105,8 @@
+  */
+ #define IS_LEAF_INDEX(x)   ((x) <= 0)
+ 
+-extern const struct __glXDispatchInfo Single_dispatch_info;
+-extern const struct __glXDispatchInfo Render_dispatch_info;
+-extern const struct __glXDispatchInfo VendorPriv_dispatch_info;
++extern struct __glXDispatchInfo Single_dispatch_info;
++extern struct __glXDispatchInfo Render_dispatch_info;
++extern struct __glXDispatchInfo VendorPriv_dispatch_info;
+ 
+ #endif                          /* INDIRECT_TABLE_H */
+diff -aurN xorg-server-1.12.1.orig/glx/indirect_util.c xorg-server-1.12.1/glx/indirect_util.c
+--- xorg-server-1.12.1.orig/glx/indirect_util.c	2012-04-21 23:39:01.821692522 +0200
++++ xorg-server-1.12.1/glx/indirect_util.c	2012-04-21 23:46:56.309760602 +0200
+@@ -192,7 +192,7 @@
+ }
+ 
+ static int
+-get_decode_index(const struct __glXDispatchInfo *dispatch_info, unsigned opcode)
++__get_decode_index(const struct __glXDispatchInfo *dispatch_info, unsigned opcode)
+ {
+     int remaining_bits;
+     int next_remain;
+@@ -257,8 +257,22 @@
+     return -1;
+ }
+ 
++static inline int
++get_decode_index(struct __glXDispatchInfo *dispatch_info, unsigned opcode)
++{
++    struct dispatch_cache *cache =
++	&dispatch_info->dispatch_cache[opcode & (DISPATCH_CACHE_SIZE-1)];
++
++    if (cache->opcode != opcode) {
++	cache->opcode = opcode;
++	cache->index = __get_decode_index(dispatch_info, opcode);
++    }
++
++    return cache->index;
++}
++
+ void *
+-__glXGetProtocolDecodeFunction(const struct __glXDispatchInfo *dispatch_info,
++__glXGetProtocolDecodeFunction(struct __glXDispatchInfo *dispatch_info,
+                                int opcode, int swapped_version)
+ {
+     const int func_index = get_decode_index(dispatch_info, opcode);
+@@ -270,7 +284,7 @@
+ }
+ 
+ int
+-__glXGetProtocolSizeData(const struct __glXDispatchInfo *dispatch_info,
++__glXGetProtocolSizeData(struct __glXDispatchInfo *dispatch_info,
+                          int opcode, __GLXrenderSizeData * data)
+ {
+     if (dispatch_info->size_table != NULL) {
+diff -aurN xorg-server-1.12.1.orig/glx/indirect_util.h xorg-server-1.12.1/glx/indirect_util.h
+--- xorg-server-1.12.1.orig/glx/indirect_util.h	2012-04-21 23:39:01.820692534 +0200
++++ xorg-server-1.12.1/glx/indirect_util.h	2012-04-21 23:47:56.373009707 +0200
+@@ -42,11 +42,11 @@
+ 
+ struct __glXDispatchInfo;
+ 
+-extern void *__glXGetProtocolDecodeFunction(const struct __glXDispatchInfo
++extern void *__glXGetProtocolDecodeFunction(struct __glXDispatchInfo
+                                             *dispatch_info, int opcode,
+                                             int swapped_version);
+ 
+-extern int __glXGetProtocolSizeData(const struct __glXDispatchInfo
++extern int __glXGetProtocolSizeData(struct __glXDispatchInfo
+                                     *dispatch_info, int opcode,
+                                     __GLXrenderSizeData * data);
+ 
