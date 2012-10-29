@@ -2,22 +2,21 @@
 
 Summary:	X.org server
 Name:		xorg-xserver-server
-Version:	1.12.4
+Version:	1.13.0
 %if "%{gitver}" != "%{nil}"
 Release:	0.%{gitver}.1
 Source0:	http://cgit.freedesktop.org/xorg/xserver/snapshot/xserver-%{gitver}.tar.bz2
-# Source0-md5:	f87d830aa69885275e26dd6327d76a44
+# Source0-md5:	bde3d178b756597d2ec2a19ef60d2e1f
 %else
 Release:	1
 Source0:	http://xorg.freedesktop.org/releases/individual/xserver/xorg-server-%{version}.tar.bz2
-# Source0-md5:	f87d830aa69885275e26dd6327d76a44
+# Source0-md5:	bde3d178b756597d2ec2a19ef60d2e1f
 %endif
 License:	MIT
 Group:		X11/Servers
 Patch0:		%{name}-less-acpi-brokenness.patch
-Patch1:		%{name}-fdo27497.patch
-Patch2:		%{name}-cache-indirect-opcode.patch
-Patch3:		%{name}-DamageSetReportAfterOp.patch
+Patch1:		%{name}-cache-indirect-opcode.patch
+Patch2:		%{name}-DamageSetReportAfterOp.patch
 URL:		http://xorg.freedesktop.org/
 BuildRequires:	OpenGL-GLX-devel
 BuildRequires:	autoconf
@@ -27,6 +26,7 @@ BuildRequires:	dbus-devel
 BuildRequires:	libdrm-devel
 BuildRequires:	libpciaccess-devel >= 0.13
 BuildRequires:	libtool
+BuildRequires:	mtdev-devel
 BuildRequires:	ncurses-devel
 BuildRequires:	perl-base
 BuildRequires:	pixman-devel
@@ -36,6 +36,7 @@ BuildRequires:	xorg-libXau-devel
 BuildRequires:	xorg-libXaw-devel
 BuildRequires:	xorg-libXdamage-devel
 BuildRequires:	xorg-libXdmcp-devel
+BuildRequires:	xorg-libXevie-devel
 BuildRequires:	xorg-libXext-devel
 BuildRequires:	xorg-libXfont-devel
 BuildRequires:	xorg-libXi-devel
@@ -102,8 +103,7 @@ Xephyr X server.
 
 %patch0 -p1
 %patch1 -p1
-%patch2 -p1
-%patch3 -p1 -R
+%patch2 -p1 -R
 
 %build
 %{__libtoolize}
@@ -169,12 +169,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/cvt
 %attr(755,root,root) %{_bindir}/gtf
 
-%attr(755,root,root) %{_libdir}/xorg/modules/extensions/libdbe.so
-%attr(755,root,root) %{_libdir}/xorg/modules/extensions/libdri.so
-%attr(755,root,root) %{_libdir}/xorg/modules/extensions/libdri2.so
-%attr(755,root,root) %{_libdir}/xorg/modules/extensions/libextmod.so
 %attr(755,root,root) %{_libdir}/xorg/modules/extensions/libglx.so
-%attr(755,root,root) %{_libdir}/xorg/modules/extensions/librecord.so
 %attr(755,root,root) %{_libdir}/xorg/modules/lib*.so
 %attr(755,root,root) %{_libdir}/xorg/modules/multimedia/*.so
 
