@@ -2,15 +2,15 @@
 
 Summary:	X.org server
 Name:		xorg-xserver-server
-Version:	1.13.2
+Version:	1.14.0
 %if "%{gitver}" != "%{nil}"
 Release:	0.%{gitver}.1
 Source0:	http://cgit.freedesktop.org/xorg/xserver/snapshot/xserver-%{gitver}.tar.bz2
-# Source0-md5:	553fd7902e1156115f15cc1656f46a6f
+# Source0-md5:	86110278b784e279381b7f6f2295c508
 %else
 Release:	1
 Source0:	http://xorg.freedesktop.org/releases/individual/xserver/xorg-server-%{version}.tar.bz2
-# Source0-md5:	553fd7902e1156115f15cc1656f46a6f
+# Source0-md5:	86110278b784e279381b7f6f2295c508
 %endif
 License:	MIT
 Group:		X11/Servers
@@ -39,7 +39,7 @@ BuildRequires:	xorg-libXdmcp-devel
 BuildRequires:	xorg-libXevie-devel
 BuildRequires:	xorg-libXext-devel
 BuildRequires:	xorg-libXfont-devel
-BuildRequires:	xorg-libXi-devel
+BuildRequires:	xorg-libXi-devel >= 1.7
 BuildRequires:	xorg-libXrender-devel
 BuildRequires:	xorg-libXres-devel
 BuildRequires:	xorg-libXt-devel
