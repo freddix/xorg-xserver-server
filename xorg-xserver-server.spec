@@ -2,21 +2,21 @@
 
 Summary:	X.org server
 Name:		xorg-xserver-server
-Version:	1.14.1
+Version:	1.14.2
 %if "%{gitver}" != "%{nil}"
 Release:	0.%{gitver}.1
 Source0:	http://cgit.freedesktop.org/xorg/xserver/snapshot/xserver-%{gitver}.tar.bz2
-# Source0-md5:	6a0f1a1639ada4b9da7e9582bc79252a
+# Source0-md5:	5d36a6483e8e301875131e8302c67727
 %else
-Release:	1
+Release:	2
 Source0:	http://xorg.freedesktop.org/releases/individual/xserver/xorg-server-%{version}.tar.bz2
-# Source0-md5:	6a0f1a1639ada4b9da7e9582bc79252a
+# Source0-md5:	5d36a6483e8e301875131e8302c67727
 %endif
 License:	MIT
 Group:		X11/Servers
 Patch0:		%{name}-less-acpi-brokenness.patch
+# http://lists.x.org/archives/xorg-devel/2011-January/018623.html
 Patch1:		%{name}-cache-indirect-opcode.patch
-Patch2:		%{name}-DamageSetReportAfterOp.patch
 URL:		http://xorg.freedesktop.org/
 BuildRequires:	OpenGL-GLX-devel
 BuildRequires:	autoconf
@@ -54,6 +54,7 @@ BuildRequires:	xorg-proto
 BuildRequires:	xorg-util-macros
 BuildRequires:	xorg-xtrans-devel
 # pixman-1 >= 0.21.8 xkbfile  xfont xau xdmcp
+Requires:	xorg-xserver-common = %{version}-%{release}
 Requires:	Mesa-dri-driver-swrast
 Requires:	xkeyboard-config
 Requires:	xorg-app-rgb
@@ -70,6 +71,13 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %description
 Xorg server is a generally used X server which uses display hardware.
 It requires proper driver for your display hardware.
+
+%package -n xorg-xserver-common
+Summary:	Common directories and files
+Group:		X11Libraries
+
+%description -n xorg-xserver-common
+Common directories and files.
 
 %package devel
 Summary:	Header files for X.org server
@@ -103,7 +111,6 @@ Xephyr X server.
 
 %patch0 -p1
 %patch1 -p1
-%patch2 -p1 -R
 
 %build
 %{__libtoolize}
@@ -112,6 +119,7 @@ Xephyr X server.
 %{__autoheader}
 %{__automake}
 %configure \
+	--disable-config-dbus			\
 	--disable-config-hal			\
 	--disable-dmx				\
 	--disable-silent-rules			\
@@ -138,9 +146,9 @@ rm -rf $RPM_BUILD_ROOT
 	DESTDIR=$RPM_BUILD_ROOT
 
 install -d $RPM_BUILD_ROOT/etc/X11/xorg.conf.d
-install -d $RPM_BUILD_ROOT%{_libdir}/xorg/modules/{dri,drivers,input}
+install -d $RPM_BUILD_ROOT%{_libdir}/xorg/modules/{drivers,input}
 
-rm -f $RPM_BUILD_ROOT%{_libdir}/xorg/modules/{*,*/*}.la
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/xorg/modules/{*,*/*}.la
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -152,28 +160,14 @@ rm -rf $RPM_BUILD_ROOT
 %else
 %doc COPYING ChangeLog
 %endif
-%dir %{_libdir}/xorg
-%dir %{_libdir}/xorg/modules
-%dir %{_libdir}/xorg/modules/dri
-%dir %{_libdir}/xorg/modules/drivers
-%dir %{_libdir}/xorg/modules/extensions
-%dir %{_libdir}/xorg/modules/input
-%dir %{_libdir}/xorg/modules/multimedia
-
-%dir %{_datadir}/X11/xorg.conf.d
-%dir /etc/X11/xorg.conf.d
-%{_datadir}/X11/xorg.conf.d/*.conf
-
 %attr(755,root,root) %{_bindir}/X
 %attr(755,root,root) %{_bindir}/Xorg
 %attr(755,root,root) %{_bindir}/cvt
 %attr(755,root,root) %{_bindir}/gtf
-
 %attr(755,root,root) %{_libdir}/xorg/modules/extensions/libglx.so
 %attr(755,root,root) %{_libdir}/xorg/modules/lib*.so
 %attr(755,root,root) %{_libdir}/xorg/modules/multimedia/*.so
-
-%{_libdir}/xorg/protocol.txt
+%{_datadir}/X11/xorg.conf.d/*.conf
 
 %dir /var/lib/xkb
 /var/lib/xkb/README.compiled
@@ -186,6 +180,18 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man4/fbdevhw.4*
 %{_mandir}/man5/xorg.conf.5x*
 %{_mandir}/man5/xorg.conf.d.5x*
+
+%files -n xorg-xserver-common
+%defattr(644,root,root,755)
+%dir %{_libdir}/xorg
+%dir %{_libdir}/xorg/modules
+%dir %{_libdir}/xorg/modules/drivers
+%dir %{_libdir}/xorg/modules/extensions
+%dir %{_libdir}/xorg/modules/input
+%dir %{_libdir}/xorg/modules/multimedia
+%dir %{_datadir}/X11/xorg.conf.d
+%dir /etc/X11/xorg.conf.d
+%{_libdir}/xorg/protocol.txt
 
 %files devel
 %defattr(644,root,root,755)
