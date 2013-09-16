@@ -2,15 +2,15 @@
 
 Summary:	X.org server
 Name:		xorg-xserver-server
-Version:	1.14.2
+Version:	1.14.3
 %if "%{gitver}" != "%{nil}"
 Release:	0.%{gitver}.1
 Source0:	http://cgit.freedesktop.org/xorg/xserver/snapshot/xserver-%{gitver}.tar.bz2
-# Source0-md5:	5d36a6483e8e301875131e8302c67727
+# Source0-md5:	86abeb08d3f7ead3a2bd3d6a9ba6714e
 %else
 Release:	2
 Source0:	http://xorg.freedesktop.org/releases/individual/xserver/xorg-server-%{version}.tar.bz2
-# Source0-md5:	5d36a6483e8e301875131e8302c67727
+# Source0-md5:	86abeb08d3f7ead3a2bd3d6a9ba6714e
 %endif
 License:	MIT
 Group:		X11/Servers
