@@ -2,21 +2,20 @@
 
 Summary:	X.org server
 Name:		xorg-xserver-server
-Version:	1.14.5
+Version:	1.15.0
 %if "%{gitver}" != "%{nil}"
 Release:	0.%{gitver}.1
 Source0:	http://cgit.freedesktop.org/xorg/xserver/snapshot/xserver-%{gitver}.tar.bz2
-# Source0-md5:	89a9e2cbcf2be3bfe3da96f19100c978
+# Source0-md5:	c2ace3697b32414094cf8c597c39d7d9
 %else
 Release:	1
 Source0:	http://xorg.freedesktop.org/releases/individual/xserver/xorg-server-%{version}.tar.bz2
-# Source0-md5:	89a9e2cbcf2be3bfe3da96f19100c978
+# Source0-md5:	c2ace3697b32414094cf8c597c39d7d9
 %endif
 License:	MIT
 Group:		X11/Servers
-Patch0:		%{name}-less-acpi-brokenness.patch
 # http://lists.x.org/archives/xorg-devel/2011-January/018623.html
-Patch1:		%{name}-cache-indirect-opcode.patch
+Patch0:		%{name}-cache-indirect-opcode.patch
 URL:		http://xorg.freedesktop.org/
 BuildRequires:	OpenGL-GLX-devel
 BuildRequires:	autoconf
@@ -26,11 +25,20 @@ BuildRequires:	dbus-devel
 BuildRequires:	libdrm-devel
 BuildRequires:	libpciaccess-devel >= 0.13
 BuildRequires:	libtool
+BuildRequires:	libunwind-devel
 BuildRequires:	mtdev-devel
 BuildRequires:	ncurses-devel
+BuildRequires:	nettle-devel
 BuildRequires:	perl-base
 BuildRequires:	pixman-devel
 BuildRequires:	pkg-config
+BuildRequires:	pkgconfig(dri3proto)
+BuildRequires:	pkgconfig(presentproto)
+BuildRequires:	pkgconfig(xextproto) >= 7.3.0
+BuildRequires:	pkgconfig(xproto) >= 7.0.25
+BuildRequires:	xcb-util-image-devel
+BuildRequires:	xcb-util-keysyms-devel
+BuildRequires:	xcb-util-wm-devel
 BuildRequires:	xorg-libX11-devel
 BuildRequires:	xorg-libXau-devel
 BuildRequires:	xorg-libXaw-devel
@@ -50,7 +58,7 @@ BuildRequires:	xorg-libXxf86misc-devel
 BuildRequires:	xorg-libXxf86vm-devel
 BuildRequires:	xorg-libfontenc-devel
 BuildRequires:	xorg-libxkbfile-devel
-BuildRequires:	xorg-proto
+BuildRequires:	xorg-libxshmfence-devel
 BuildRequires:	xorg-util-macros
 BuildRequires:	xorg-xtrans-devel
 # pixman-1 >= 0.21.8 xkbfile  xfont xau xdmcp
@@ -110,7 +118,6 @@ Xephyr X server.
 %endif
 
 %patch0 -p1
-%patch1 -p1
 
 %build
 %{__libtoolize}
@@ -122,6 +129,8 @@ Xephyr X server.
 	--disable-config-dbus			\
 	--disable-config-hal			\
 	--disable-dmx				\
+	--disable-linux-acpi			\
+	--disable-linux-apm			\
 	--disable-silent-rules			\
 	--disable-xfake				\
 	--disable-xfbdev			\
@@ -132,11 +141,12 @@ Xephyr X server.
 	--enable-xephyr				\
 	--enable-xnest				\
 	--enable-xvmc				\
-	--with-fontrootdir="%{_fontsdir}"	\
 	--with-dri-driver-path=%{_libdir}/xorg/modules/dri	\
+	--with-fontrootdir="%{_fontsdir}"	\
 	--with-os-name="Freddix"		\
 	--with-xkb-output=/var/lib/xkb		\
-	--with-xkb-path=/usr/share/X11/xkb
+	--with-xkb-path=/usr/share/X11/xkb	\
+	--without-dtrace
 %{__make}
 
 %install
