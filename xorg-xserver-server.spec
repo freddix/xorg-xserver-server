@@ -8,7 +8,7 @@ Release:	0.%{gitver}.1
 Source0:	http://cgit.freedesktop.org/xorg/xserver/snapshot/xserver-%{gitver}.tar.bz2
 # Source0-md5:	e4c70262ed89764be8f8f5d699ed9227
 %else
-Release:	1
+Release:	2
 Source0:	http://xorg.freedesktop.org/releases/individual/xserver/xorg-server-%{version}.tar.bz2
 # Source0-md5:	e4c70262ed89764be8f8f5d699ed9227
 %endif
@@ -110,6 +110,13 @@ Group:		X11/Servers
 %description -n xorg-xserver-Xephyr
 Xephyr X server.
 
+%package -n xorg-xserver-Xvfb
+Summary:	Xvfb X server
+Group:		X11/Servers
+
+%description -n xorg-xserver-Xvfb
+Xvfb X server.
+
 %prep
 %if "%{gitver}" != "%{nil}"
 %setup -qn xserver-%{gitver}
@@ -134,12 +141,12 @@ Xephyr X server.
 	--disable-silent-rules			\
 	--disable-xfake				\
 	--disable-xfbdev			\
-	--disable-xvfb				\
 	--enable-config-udev			\
 	--enable-glx-tls			\
 	--enable-kdrive				\
 	--enable-xephyr				\
 	--enable-xnest				\
+	--enable-xvfb				\
 	--enable-xvmc				\
 	--with-dri-driver-path=%{_libdir}/xorg/modules/dri	\
 	--with-fontrootdir="%{_fontsdir}"	\
@@ -218,4 +225,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/Xephyr
 %{_mandir}/man1/Xephyr.1x*
+
+%files -n xorg-xserver-Xvfb
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/Xvfb
+%{_mandir}/man1/Xvfb.1x*
 
