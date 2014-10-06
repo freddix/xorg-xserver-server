@@ -2,15 +2,15 @@
 
 Summary:	X.org server
 Name:		xorg-xserver-server
-Version:	1.15.1
+Version:	1.16.1
 %if "%{gitver}" != "%{nil}"
 Release:	0.%{gitver}.1
 Source0:	http://cgit.freedesktop.org/xorg/xserver/snapshot/xserver-%{gitver}.tar.bz2
-# Source0-md5:	e4c70262ed89764be8f8f5d699ed9227
+# Source0-md5:	b1ff364222e921d32de40c4786e8bc47
 %else
-Release:	2
+Release:	3
 Source0:	http://xorg.freedesktop.org/releases/individual/xserver/xorg-server-%{version}.tar.bz2
-# Source0-md5:	e4c70262ed89764be8f8f5d699ed9227
+# Source0-md5:	b1ff364222e921d32de40c4786e8bc47
 %endif
 License:	MIT
 Group:		X11/Servers
@@ -23,6 +23,7 @@ BuildRequires:	automake
 BuildRequires:	cpp
 BuildRequires:	dbus-devel
 BuildRequires:	libdrm-devel
+BuildRequires:	libepoxy-devel
 BuildRequires:	libpciaccess-devel >= 0.13
 BuildRequires:	libtool
 BuildRequires:	libunwind-devel
@@ -36,12 +37,13 @@ BuildRequires:	pkgconfig(dri3proto)
 BuildRequires:	pkgconfig(presentproto)
 BuildRequires:	pkgconfig(xextproto) >= 7.3.0
 BuildRequires:	pkgconfig(xproto) >= 7.0.25
+BuildRequires:	systemd-devel
+BuildRequires:	wayland-devel
 BuildRequires:	xcb-util-image-devel
 BuildRequires:	xcb-util-keysyms-devel
 BuildRequires:	xcb-util-wm-devel
 BuildRequires:	xorg-libX11-devel
 BuildRequires:	xorg-libXau-devel
-BuildRequires:	xorg-libXaw-devel
 BuildRequires:	xorg-libXdamage-devel
 BuildRequires:	xorg-libXdmcp-devel
 BuildRequires:	xorg-libXevie-devel
@@ -72,9 +74,11 @@ Requires:	xorg-font-alias
 Requires:	xorg-font-cursor-misc
 Requires:	xorg-font-misc-base
 Requires:	xorg-libXt
+Obsoletes:	glamor
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		_noautoreq	libscanpci.so libxf1bpp.so
+%define		_libexecdir	%{_bindir}
 
 %description
 Xorg server is a generally used X server which uses display hardware.
@@ -92,6 +96,7 @@ Summary:	Header files for X.org server
 Group:		X11/Development/Libraries
 Requires:	libdrm-devel
 Requires:	xorg-proto
+Obsoletes:	glamor-devel
 
 %description devel
 Header files for X.org server.
@@ -117,6 +122,13 @@ Group:		X11/Servers
 %description -n xorg-xserver-Xvfb
 Xvfb X server.
 
+%package -n xorg-xserver-Xwayland
+Summary:	Xwayland X server
+Group:		X11/Servers
+
+%description -n xorg-xserver-Xwayland
+Xwayland X server.
+
 %prep
 %if "%{gitver}" != "%{nil}"
 %setup -qn xserver-%{gitver}
@@ -141,16 +153,22 @@ Xvfb X server.
 	--disable-silent-rules			\
 	--disable-xfake				\
 	--disable-xfbdev			\
+	--disable-install-setuid		\
 	--enable-config-udev			\
+	--enable-glamor				\
 	--enable-glx-tls			\
 	--enable-kdrive				\
+	--enable-suid-wrapper			\
+	--enable-systemd-logind			\
 	--enable-xephyr				\
 	--enable-xnest				\
 	--enable-xvfb				\
 	--enable-xvmc				\
+	--enable-xwayland			\
 	--with-dri-driver-path=%{_libdir}/xorg/modules/dri	\
 	--with-fontrootdir="%{_fontsdir}"	\
 	--with-os-name="Freddix"		\
+	--with-systemd-daemon			\
 	--with-xkb-output=/var/lib/xkb		\
 	--with-xkb-path=/usr/share/X11/xkb	\
 	--without-dtrace
@@ -166,6 +184,7 @@ install -d $RPM_BUILD_ROOT/etc/X11/xorg.conf.d
 install -d $RPM_BUILD_ROOT%{_libdir}/xorg/modules/{drivers,input}
 
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/xorg/modules/{*,*/*}.la
+%{__rm} $RPM_BUILD_ROOT%{_mandir}/man5/Xwrapper.config.5x
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -179,6 +198,8 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %attr(755,root,root) %{_bindir}/X
 %attr(755,root,root) %{_bindir}/Xorg
+%attr(755,root,root) %{_bindir}/Xorg.bin
+%attr(4755,root,root) %{_bindir}/Xorg.wrap
 %attr(755,root,root) %{_bindir}/cvt
 %attr(755,root,root) %{_bindir}/gtf
 %attr(755,root,root) %{_libdir}/xorg/modules/extensions/libglx.so
@@ -190,6 +211,7 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/xkb/README.compiled
 
 %{_mandir}/man1/Xorg.1x*
+%{_mandir}/man1/Xorg.wrap.1x*
 %{_mandir}/man1/Xserver.1x*
 %{_mandir}/man1/cvt.1*
 %{_mandir}/man1/gtf.1x*
@@ -230,4 +252,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/Xvfb
 %{_mandir}/man1/Xvfb.1x*
+
+%files -n xorg-xserver-Xwayland
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/Xwayland
 
