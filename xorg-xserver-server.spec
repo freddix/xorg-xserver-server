@@ -2,16 +2,18 @@
 
 Summary:	X.org server
 Name:		xorg-xserver-server
-Version:	1.16.1
+Version:	1.16.3
 %if "%{gitver}" != "%{nil}"
 Release:	0.%{gitver}.1
 Source0:	http://cgit.freedesktop.org/xorg/xserver/snapshot/xserver-%{gitver}.tar.bz2
-# Source0-md5:	b1ff364222e921d32de40c4786e8bc47
+# Source0-md5:	afd93977235584a9caa7528a737c1b52
 %else
-Release:	3
+Release:	1
 Source0:	http://xorg.freedesktop.org/releases/individual/xserver/xorg-server-%{version}.tar.bz2
-# Source0-md5:	b1ff364222e921d32de40c4786e8bc47
+# Source0-md5:	afd93977235584a9caa7528a737c1b52
 %endif
+Source1:	xvfb-run
+Source2:	xvfb-run.1
 License:	MIT
 Group:		X11/Servers
 # http://lists.x.org/archives/xorg-devel/2011-January/018623.html
@@ -118,6 +120,7 @@ Xephyr X server.
 %package -n xorg-xserver-Xvfb
 Summary:	Xvfb X server
 Group:		X11/Servers
+Requires:	xorg-app-xauth
 
 %description -n xorg-xserver-Xvfb
 Xvfb X server.
@@ -179,6 +182,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
+
+install %{SOURCE1} $RPM_BUILD_ROOT%{_bindir}
+install %{SOURCE2} $RPM_BUILD_ROOT%{_mandir}/man1
 
 install -d $RPM_BUILD_ROOT/etc/X11/xorg.conf.d
 install -d $RPM_BUILD_ROOT%{_libdir}/xorg/modules/{drivers,input}
@@ -251,7 +257,9 @@ rm -rf $RPM_BUILD_ROOT
 %files -n xorg-xserver-Xvfb
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/Xvfb
+%attr(755,root,root) %{_bindir}/xvfb-run
 %{_mandir}/man1/Xvfb.1x*
+%{_mandir}/man1/xvfb-run.1*
 
 %files -n xorg-xserver-Xwayland
 %defattr(644,root,root,755)
