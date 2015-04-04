@@ -2,15 +2,15 @@
 
 Summary:	X.org server
 Name:		xorg-xserver-server
-Version:	1.16.3
+Version:	1.17.1
 %if "%{gitver}" != "%{nil}"
 Release:	0.%{gitver}.1
 Source0:	http://cgit.freedesktop.org/xorg/xserver/snapshot/xserver-%{gitver}.tar.bz2
-# Source0-md5:	afd93977235584a9caa7528a737c1b52
+# Source0-md5:	5986510d59e394a50126a8e2833e79d3
 %else
 Release:	1
 Source0:	http://xorg.freedesktop.org/releases/individual/xserver/xorg-server-%{version}.tar.bz2
-# Source0-md5:	afd93977235584a9caa7528a737c1b52
+# Source0-md5:	5986510d59e394a50126a8e2833e79d3
 %endif
 Source1:	xvfb-run
 Source2:	xvfb-run.1
@@ -72,15 +72,13 @@ Requires:	xkeyboard-config
 Requires:	xorg-app-rgb
 Requires:	xorg-app-xkbcomp
 Requires:	xorg-driver-input-evdev
-Requires:	xorg-font-alias
-Requires:	xorg-font-cursor-misc
-Requires:	xorg-font-misc-base
 Requires:	xorg-libXt
 Obsoletes:	glamor
+Obsoletes:	xorg-driver-video-modesetting
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		_noautoreq	libscanpci.so libxf1bpp.so
-%define		_libexecdir	%{_bindir}
+%define		_libexecdir	%{_libdir}/xorg/xserver
 
 %description
 Xorg server is a generally used X server which uses display hardware.
@@ -204,13 +202,13 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 %attr(755,root,root) %{_bindir}/X
 %attr(755,root,root) %{_bindir}/Xorg
-%attr(755,root,root) %{_bindir}/Xorg.bin
-%attr(4755,root,root) %{_bindir}/Xorg.wrap
 %attr(755,root,root) %{_bindir}/cvt
 %attr(755,root,root) %{_bindir}/gtf
+%attr(755,root,root) %{_libdir}/xorg/modules/drivers/modesetting_drv.so
 %attr(755,root,root) %{_libdir}/xorg/modules/extensions/libglx.so
 %attr(755,root,root) %{_libdir}/xorg/modules/lib*.so
-%attr(755,root,root) %{_libdir}/xorg/modules/multimedia/*.so
+%attr(755,root,root) %{_libdir}/xorg/xserver/Xorg
+%attr(4755,root,root) %{_libdir}/xorg/xserver/Xorg.wrap
 %{_datadir}/X11/xorg.conf.d/*.conf
 
 %dir /var/lib/xkb
@@ -223,6 +221,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/gtf.1x*
 %{_mandir}/man4/exa.4*
 %{_mandir}/man4/fbdevhw.4*
+%{_mandir}/man4/modesetting.4*
 %{_mandir}/man5/xorg.conf.5x*
 %{_mandir}/man5/xorg.conf.d.5x*
 
@@ -233,9 +232,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/xorg/modules/drivers
 %dir %{_libdir}/xorg/modules/extensions
 %dir %{_libdir}/xorg/modules/input
-%dir %{_libdir}/xorg/modules/multimedia
-%dir %{_datadir}/X11/xorg.conf.d
+%dir %{_libdir}/xorg/xserver
 %dir /etc/X11/xorg.conf.d
+%dir %{_datadir}/X11/xorg.conf.d
 %{_libdir}/xorg/protocol.txt
 
 %files devel
